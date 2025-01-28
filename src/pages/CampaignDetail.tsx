@@ -15,7 +15,7 @@ const MOCK_CAMPAIGN = {
   - Energy Optimization
   - Smart Device Integration
   - Privacy-First Design`,
-  imageUrl: "/placeholder.svg",
+  imageUrl: "/au.jpg",
   raised: 50000,
   goal: 100000,
   daysLeft: 30,
