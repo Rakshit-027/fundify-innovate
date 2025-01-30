@@ -14,6 +14,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { useMutation } from "@tanstack/react-query";
 
 const formSchema = z.object({
   title: z.string().min(10, "Title must be at least 10 characters"),
@@ -31,6 +35,46 @@ const formSchema = z.object({
 
 const StartCampaign = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const createCampaign = async (values: z.infer<typeof formSchema>) => {
+    if (!user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase.from("campaigns").insert([
+      {
+        title: values.title,
+        description: values.description,
+        goal: Number(values.goal),
+        duration: Number(values.duration),
+        user_id: user.id,
+        raised: 0,
+        created_at: new Date().toISOString(),
+      },
+    ]).select();
+
+    if (error) throw error;
+    return data[0];
+  };
+
+  const mutation = useMutation({
+    mutationFn: createCampaign,
+    onSuccess: (data) => {
+      toast({
+        title: "Campaign Created!",
+        description: "Your campaign has been submitted successfully.",
+      });
+      navigate(`/campaign/${data.id}`);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create campaign",
+        variant: "destructive",
+      });
+    },
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,11 +86,7 @@ const StartCampaign = () => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: "Campaign Created!",
-      description: "Your campaign has been submitted for review.",
-    });
+    mutation.mutate(values);
   }
 
   return (
