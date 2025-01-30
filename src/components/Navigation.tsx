@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, Search, X } from "lucide-react";
+import { Menu, Search, X, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
@@ -47,7 +47,15 @@ const Navigation = () => {
               Search
             </Button>
             {user ? (
-              <Button onClick={handleSignOut}>Sign Out</Button>
+              <div className="flex items-center space-x-4">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/profile">
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Link>
+                </Button>
+                <Button onClick={handleSignOut}>Sign Out</Button>
+              </div>
             ) : (
               <Button onClick={() => navigate("/auth")}>Sign In</Button>
             )}
@@ -91,7 +99,16 @@ const Navigation = () => {
                 Search
               </Button>
               {user ? (
-                <Button onClick={handleSignOut}>Sign Out</Button>
+                <>
+                  <Link
+                    to="/profile"
+                    className="text-gray-600 hover:text-primary px-2 py-1"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <Button onClick={handleSignOut}>Sign Out</Button>
+                </>
               ) : (
                 <Button onClick={() => navigate("/auth")}>Sign In</Button>
               )}
