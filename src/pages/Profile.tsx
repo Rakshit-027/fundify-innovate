@@ -38,8 +38,10 @@ const Profile = () => {
       return data as Profile;
     },
     enabled: !!user,
-    onSuccess: (data) => {
-      setProfile(data);
+    meta: {
+      onSuccess: (data: Profile) => {
+        setProfile(data);
+      },
     },
   });
 
