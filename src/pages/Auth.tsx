@@ -4,17 +4,38 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const validateForm = () => {
+    if (!email || !password) {
+      setError("Email and password are required");
+      return false;
+    }
+    if (password.length < 6) {
+      setError("Password should be at least 6 characters");
+      return false;
+    }
+    if (!email.includes("@")) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     try {
       if (isSignUp) {
         await signUp(email, password);
@@ -30,9 +51,11 @@ const Auth = () => {
         navigate("/");
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : "An error occurred";
+      setError(message);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: message,
         variant: "destructive",
       });
     }
@@ -44,6 +67,11 @@ const Auth = () => {
         {isSignUp ? "Create an Account" : "Sign In"}
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <div>
           <Input
             type="email"
@@ -60,6 +88,7 @@ const Auth = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={6}
           />
         </div>
         <Button type="submit" className="w-full">
